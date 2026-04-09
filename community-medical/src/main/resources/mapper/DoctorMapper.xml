@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.medical.mapper.DoctorMapper">
+
+    <resultMap id="BaseResultMap" type="com.medical.entity.Doctor">
+        <id column="id" property="id"/>
+        <result column="name" property="name"/>
+        <result column="gender" property="gender"/>
+        <result column="age" property="age"/>
+        <result column="title" property="title"/>
+        <result column="department_id" property="departmentId"/>
+        <result column="description" property="description"/>
+        <result column="create_time" property="createTime"/>
+    </resultMap>
+
+    <select id="selectByDepartmentId" resultMap="BaseResultMap">
+        SELECT * FROM doctor WHERE department_id = #{departmentId}
+    </select>
+
+    <insert id="insert" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO doctor (name, gender, age, title, department_id, description, create_time)
+        VALUES (#{name}, #{gender}, #{age}, #{title}, #{departmentId}, #{description}, NOW())
+    </insert>
+
+    <update id="update">
+        UPDATE doctor
+        SET name = #{name},
+            gender = #{gender},
+            age = #{age},
+            title = #{title},
+            department_id = #{departmentId},
+            description = #{description}
+        WHERE id = #{id}
+    </update>
+
+    <delete id="deleteById">
+        DELETE FROM doctor WHERE id = #{id}
+    </delete>
+
+    <select id="selectById" resultMap="BaseResultMap">
+        SELECT * FROM doctor WHERE id = #{id}
+    </select>
+
+    <select id="selectAll" resultMap="BaseResultMap">
+        SELECT * FROM doctor ORDER BY id
+    </select>
+
+</mapper>

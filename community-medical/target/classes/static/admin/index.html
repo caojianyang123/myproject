@@ -1,0 +1,1120 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>后台管理 - 社区医疗预约管理系统</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" integrity="sha384-9ndCyUaIbzAi2FUVXJi0CjmCapSmO7SnpJef0486qhLnuZ2cdeRhO02iuK6FUUVM" crossorigin="anonymous">
+    <style>
+        .sidebar {
+            height: 100vh;
+            background-color: #f8f9fa;
+            border-right: 1px solid #dee2e6;
+        }
+        .content {
+            min-height: 100vh;
+            padding: 20px;
+        }
+        .nav-link {
+            color: #495057;
+        }
+        .nav-link.active {
+            background-color: #e9ecef;
+            font-weight: bold;
+        }
+        
+        /* 模态框样式 */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0,0,0,0.4);
+        }
+        
+        .modal-content {
+            background-color: #fefefe;
+            margin: 15% auto;
+            padding: 20px;
+            border: 1px solid #888;
+            width: 80%;
+            max-width: 500px;
+            border-radius: 5px;
+        }
+        
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        
+        .modal-header h3 {
+            margin: 0;
+        }
+        
+        .close {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        
+        .close:hover,
+        .close:focus {
+            color: black;
+            text-decoration: none;
+            cursor: pointer;
+        }
+        
+        .modal-footer {
+            margin-top: 20px;
+            display: flex;
+            justify-content: flex-end;
+        }
+        
+        .modal-footer button {
+            margin-left: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container-fluid">
+        <div class="row">
+            <!-- 侧边栏 -->
+            <div class="col-md-3 sidebar">
+                <div class="p-4">
+                    <h2>后台管理</h2>
+                </div>
+                <nav class="nav flex-column">
+                    <a class="nav-link active" href="#" onclick="showTab('user-management')">用户管理</a>
+                    <a class="nav-link" href="#" onclick="showTab('department-management')">科室管理</a>
+                    <a class="nav-link" href="#" onclick="showTab('doctor-management')">医生管理</a>
+                    <a class="nav-link" href="#" onclick="showTab('appointment-management')">预约管理</a>
+                    <a class="nav-link" href="#" onclick="showTab('admin-management')">管理员管理</a>
+                    <a class="nav-link" href="#" onclick="showTab('data-statistics')">数据统计</a>
+                    <a class="nav-link" href="login.html" onclick="logout()">退出登录</a>
+                </nav>
+            </div>
+            
+            <!-- 主内容区 -->
+            <div class="col-md-9 content">
+                <div class="tab-content">
+                    <!-- 用户管理 -->
+                    <div id="user-management" class="tab-pane active">
+                        <h3>用户管理</h3>
+                        <table class="table table-bordered mt-4">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>用户名</th>
+                                    <th>姓名</th>
+                                    <th>电话</th>
+                                    <th>身份证号</th>
+                                    <th>状态</th>
+                                    <th>操作</th>
+                                </tr>
+                            </thead>
+                            <tbody id="userList">
+                                <!-- 用户列表将通过JavaScript动态生成 -->
+                            </tbody>
+                        </table>
+                    </div>
+                    
+                    <!-- 科室管理 -->
+                    <div id="department-management" class="tab-pane">
+                        <h3>科室管理</h3>
+                        <button class="btn btn-primary mb-4" onclick="showAddDepartmentForm()">添加科室</button>
+                        <table class="table table-bordered mt-4">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>科室名称</th>
+                                    <th>描述</th>
+                                    <th>操作</th>
+                                </tr>
+                            </thead>
+                            <tbody id="departmentList">
+                                <!-- 科室列表将通过JavaScript动态生成 -->
+                            </tbody>
+                        </table>
+                    </div>
+                    
+                    <!-- 医生管理 -->
+                    <div id="doctor-management" class="tab-pane">
+                        <h3>医生管理</h3>
+                        <button class="btn btn-primary mb-4" onclick="showAddDoctorForm()">添加医生</button>
+                        <table class="table table-bordered mt-4">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>姓名</th>
+                                    <th>性别</th>
+                                    <th>年龄</th>
+                                    <th>职称</th>
+                                    <th>科室</th>
+                                    <th>操作</th>
+                                </tr>
+                            </thead>
+                            <tbody id="doctorList">
+                                <!-- 医生列表将通过JavaScript动态生成 -->
+                            </tbody>
+                        </table>
+                    </div>
+                    
+                    <!-- 预约管理 -->
+                    <div id="appointment-management" class="tab-pane">
+                        <h3>预约管理</h3>
+                        <table class="table table-bordered mt-4">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>用户</th>
+                                    <th>医生</th>
+                                    <th>预约日期</th>
+                                    <th>病情描述</th>
+                                    <th>状态</th>
+                                    <th>操作</th>
+                                </tr>
+                            </thead>
+                            <tbody id="appointmentList">
+                                <!-- 预约列表将通过JavaScript动态生成 -->
+                            </tbody>
+                        </table>
+                    </div>
+                    
+                    <!-- 管理员管理 -->
+                    <div id="admin-management" class="tab-pane">
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <h3>管理员管理</h3>
+                            <button class="btn btn-primary" onclick="showAddAdminForm()">添加管理员</button>
+                        </div>
+                        <table class="table table-bordered">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>用户名</th>
+                                    <th>姓名</th>
+                                    <th>操作</th>
+                                </tr>
+                            </thead>
+                            <tbody id="adminTableBody">
+                                <!-- 管理员数据将通过JavaScript动态加载 -->
+                            </tbody>
+                        </table>
+                    </div>
+                    
+                    <!-- 数据统计 -->
+                    <div id="data-statistics" class="tab-pane">
+                        <h3>数据统计</h3>
+                        <div class="mt-4">
+                            <h4>预约人数趋势</h4>
+                            <div id="appointmentChart" style="width: 100%; height: 400px;"></div>
+                        </div>
+                        <div class="mt-6">
+                            <h4>各科室预约人数</h4>
+                            <div id="departmentChart" style="width: 100%; height: 400px;"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js" integrity="sha384-geWF76RCwLtnZ8qwWowPQNguL3RmwHVBC9FhGdlKrxdiJJigb/j/68SIy3Te4Bkz" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/axios@1.6.2/dist/axios.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
+    <script>
+        // 设置axios默认配置，携带凭证（cookie）
+        axios.defaults.withCredentials = true;
+        // 页面加载时立即检查管理员登录状态
+        window.onload = function() {
+            checkAdminLoginStatus();
+        };
+
+        // 检查管理员登录状态
+        function checkAdminLoginStatus() {
+            axios.get('/medical/admin/info')
+                .then(response => {
+                    if (response.data.code === 200) {
+                        // 已登录，加载初始数据
+                        console.log('管理员已登录');
+                        loadUsers();
+                    } else {
+                        // 未登录，直接跳转到登录页面
+                        alert('请先登录管理员账号');
+                        window.location.href = 'login.html';
+                    }
+                })
+                .catch(error => {
+                    console.error('检查登录状态失败:', error);
+                    // 请求失败也视为未登录，直接跳转
+                    alert('登录状态验证失败，请重新登录');
+                    window.location.href = 'login.html';
+                });
+        }
+
+        // 显示指定标签页
+        function showTab(tabId) {
+            // 隐藏所有标签页
+            document.querySelectorAll('.tab-pane').forEach(pane => {
+                pane.classList.remove('active');
+            });
+            // 显示选中的标签页
+            document.getElementById(tabId).classList.add('active');
+            // 更新导航链接状态
+            document.querySelectorAll('.nav-link').forEach(link => {
+                link.classList.remove('active');
+            });
+            event.target.classList.add('active');
+            
+            // 加载对应数据
+            if (tabId === 'user-management') {
+                loadUsers();
+            } else if (tabId === 'department-management') {
+                loadDepartments();
+            } else if (tabId === 'doctor-management') {
+                loadDoctors();
+            } else if (tabId === 'appointment-management') {
+                loadAppointments();
+            } else if (tabId === 'admin-management') {
+                loadAdmins();
+            } else if (tabId === 'data-statistics') {
+                loadStatistics();
+            }
+        }
+
+        // 退出登录
+        function logout() {
+            axios.post('/medical/admin/logout')
+                .then(response => {
+                    if (response.data.code === 200) {
+                        window.location.href = 'login.html';
+                    }
+                });
+        }
+
+        // 加载用户列表
+        function loadUsers() {
+            // 调用API获取用户列表
+            const userList = document.getElementById('userList');
+            userList.innerHTML = '<tr><td colspan="7" class="text-center">加载中...</td></tr>';
+            
+            axios.get('/medical/user/list')
+                .then(function(response) {
+                    if (response.data.code === 200) {
+                        const users = response.data.data;
+                        userList.innerHTML = '';
+                        users.forEach(function(user) {
+                            const row = document.createElement('tr');
+                            row.innerHTML = `
+                                <td>${user.id}</td>
+                                <td>${user.username}</td>
+                                <td>${user.name}</td>
+                                <td>${user.phone}</td>
+                                <td>${user.idCard}</td>
+                                <td>${user.status === 1 ? '正常' : '禁用'}</td>
+                                <td>
+                                    ${user.status === 1 ? 
+                                        `<button class="btn btn-danger btn-sm" onclick="disableUser(${user.id})">禁用</button>` : 
+                                        `<button class="btn btn-success btn-sm" onclick="enableUser(${user.id})">启用</button>`}
+                                    <button class="btn btn-danger btn-sm ml-2" onclick="deleteUser(${user.id})">删除</button>
+                                </td>
+                            `;
+                            userList.appendChild(row);
+                        });
+                    } else {
+                        userList.innerHTML = '<tr><td colspan="7" class="text-center text-danger">加载失败</td></tr>';
+                    }
+                })
+                .catch(function(error) {
+                    console.error('加载用户列表失败:', error);
+                    userList.innerHTML = '<tr><td colspan="7" class="text-center text-danger">加载失败</td></tr>';
+                });
+        }
+
+        // 禁用用户
+        function disableUser(id) {
+            if (confirm('确定要禁用这个用户吗？')) {
+                axios.put(`/medical/user/disable/${id}`)
+                    .then(function(response) {
+                        if (response.data.code === 200) {
+                            alert('禁用成功');
+                            loadUsers();
+                        } else {
+                            alert('禁用失败: ' + response.data.message);
+                        }
+                    })
+                    .catch(function(error) {
+                        console.error('禁用用户失败:', error);
+                        alert('禁用失败，请检查网络连接');
+                    });
+            }
+        }
+
+        // 启用用户
+        function enableUser(id) {
+            if (confirm('确定要启用这个用户吗？')) {
+                axios.put(`/medical/user/enable/${id}`)
+                    .then(function(response) {
+                        if (response.data.code === 200) {
+                            alert('启用成功');
+                            loadUsers();
+                        } else {
+                            alert('启用失败: ' + response.data.message);
+                        }
+                    })
+                    .catch(function(error) {
+                        console.error('启用用户失败:', error);
+                        alert('启用失败，请检查网络连接');
+                    });
+            }
+        }
+
+        // 删除用户
+        function deleteUser(id) {
+            if (confirm('确定要删除这个用户吗？')) {
+                axios.delete(`/medical/user/delete/${id}`)
+                    .then(function(response) {
+                        if (response.data.code === 200) {
+                            alert('删除成功');
+                            loadUsers();
+                        } else {
+                            alert('删除失败: ' + response.data.message);
+                        }
+                    })
+                    .catch(function(error) {
+                        console.error('删除用户失败:', error);
+                        alert('删除失败，请检查网络连接');
+                    });
+            }
+        }
+
+        // 加载科室列表
+        function loadDepartments() {
+            axios.get('/medical/department/list')
+                .then(response => {
+                    if (response.data.code === 200) {
+                        const departments = response.data.data;
+                        const departmentList = document.getElementById('departmentList');
+                        departmentList.innerHTML = '';
+                        departments.forEach(department => {
+                            const row = document.createElement('tr');
+                            row.innerHTML = `
+                                <td>${department.id}</td>
+                                <td>${department.name}</td>
+                                <td>${department.description}</td>
+                                <td>
+                                    <button class="btn btn-primary btn-sm" onclick="editDepartment(${department.id})">编辑</button>
+                                    <button class="btn btn-danger btn-sm" onclick="deleteDepartment(${department.id})">删除</button>
+                                </td>
+                            `;
+                            departmentList.appendChild(row);
+                        });
+                    }
+                });
+        }
+
+        // 加载医生列表
+        function loadDoctors() {
+            // 首先获取科室列表
+            axios.get('/medical/department/list')
+                .then(function(deptResponse) {
+                    if (deptResponse.data.code === 200) {
+                        const departments = deptResponse.data.data;
+                        const departmentMap = {};
+                        departments.forEach(dept => {
+                            departmentMap[dept.id] = dept.name;
+                        });
+                        
+                        // 然后获取医生列表
+                        axios.get('/medical/doctor/list')
+                            .then(function(doctorResponse) {
+                                if (doctorResponse.data.code === 200) {
+                                    const doctors = doctorResponse.data.data;
+                                    const doctorList = document.getElementById('doctorList');
+                                    doctorList.innerHTML = '';
+                                    doctors.forEach(doctor => {
+                                        const row = document.createElement('tr');
+                                        const departmentName = departmentMap[doctor.departmentId] || '未知';
+                                        row.innerHTML = `
+                                            <td>${doctor.id}</td>
+                                            <td>${doctor.name}</td>
+                                            <td>${doctor.gender}</td>
+                                            <td>${doctor.age}</td>
+                                            <td>${doctor.title}</td>
+                                            <td>${departmentName}</td>
+                                            <td>
+                                                <button class="btn btn-primary btn-sm">编辑</button>
+                                                <button class="btn btn-danger btn-sm">删除</button>
+                                            </td>
+                                        `;
+                                        doctorList.appendChild(row);
+                                    });
+                                }
+                            })
+                            .catch(function(error) {
+                                console.error('加载医生列表失败:', error);
+                            });
+                    }
+                })
+                .catch(function(error) {
+                    console.error('加载科室列表失败:', error);
+                });
+        }
+
+        // 加载预约列表
+        function loadAppointments() {
+            axios.get('/medical/appointment/list')
+                .then(response => {
+                    if (response.data.code === 200) {
+                        const appointments = response.data.data;
+                        const appointmentList = document.getElementById('appointmentList');
+                        appointmentList.innerHTML = '';
+                        
+                        // 批量获取用户和医生信息
+                        const userIds = [...new Set(appointments.map(a => a.userId).filter(id => id))];
+                        const doctorIds = [...new Set(appointments.map(a => a.doctorId).filter(id => id))];
+                        
+                        const userMap = {};
+                        const doctorMap = {};
+                        
+                        // 获取用户信息
+                        if (userIds.length > 0) {
+                            userIds.forEach(userId => {
+                                axios.get(`/medical/user/${userId}`)
+                                    .then(userResponse => {
+                                        if (userResponse.data.code === 200) {
+                                            userMap[userId] = userResponse.data.data;
+                                            updateAppointmentList();
+                                        }
+                                    });
+                            });
+                        }
+                        
+                        // 获取医生信息
+                        if (doctorIds.length > 0) {
+                            doctorIds.forEach(doctorId => {
+                                axios.get(`/medical/doctor/${doctorId}`)
+                                    .then(doctorResponse => {
+                                        if (doctorResponse.data.code === 200) {
+                                            doctorMap[doctorId] = doctorResponse.data.data;
+                                            updateAppointmentList();
+                                        }
+                                    });
+                            });
+                        }
+                        
+                        // 更新预约列表
+                        function updateAppointmentList() {
+                            appointmentList.innerHTML = '';
+                            appointments.forEach(appointment => {
+                                const statusText = {
+                                    0: '待确认',
+                                    1: '已确认',
+                                    2: '已取消'
+                                };
+                                const row = document.createElement('tr');
+                                row.innerHTML = `
+                                    <td>${appointment.id}</td>
+                                    <td>${userMap[appointment.userId] ? userMap[appointment.userId].name : '未知'}</td>
+                                    <td>${doctorMap[appointment.doctorId] ? doctorMap[appointment.doctorId].name : '未知'}</td>
+                                    <td>${appointment.appointmentDate}</td>
+                                    <td>${appointment.description}</td>
+                                    <td>${statusText[appointment.status]}</td>
+                                    <td>
+                                        ${appointment.status === 0 ? 
+                                            `<button class="btn btn-primary btn-sm" onclick="confirmAppointment(${appointment.id})">确认</button>` : 
+                                            '-'}
+                                    </td>
+                                `;
+                                appointmentList.appendChild(row);
+                            });
+                        }
+                        
+                        // 初始更新
+                        updateAppointmentList();
+                    }
+                });
+        }
+
+        // 确认预约
+        function confirmAppointment(id) {
+            axios.put(`/medical/appointment/confirm/${id}`)
+                .then(response => {
+                    if (response.data.code === 200) {
+                        alert('确认成功');
+                        loadAppointments();
+                    } else {
+                        alert(response.data.message);
+                    }
+                });
+        }
+
+        // 加载数据统计
+        function loadStatistics() {
+            // 加载预约人数趋势图
+            loadAppointmentTrend();
+            // 加载科室预约人数柱状图
+            loadDepartmentAppointments();
+        }
+
+        // 加载预约人数趋势图
+        function loadAppointmentTrend() {
+            // 获取所有预约数据
+            axios.get('/medical/appointment/list')
+                .then(function(response) {
+                    if (response.data.code === 200) {
+                        const appointments = response.data.data;
+                        // 按月份统计预约人数
+                        const monthCounts = {1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0};
+                        
+                        appointments.forEach(appointment => {
+                            if (appointment.appointmentDate) {
+                                const date = new Date(appointment.appointmentDate);
+                                const month = date.getMonth() + 1; // 月份从0开始，所以+1
+                                if (month >= 1 && month <= 6) {
+                                    monthCounts[month]++;
+                                }
+                            }
+                        });
+                        
+                        // 准备图表数据
+                        const months = ['1月', '2月', '3月', '4月', '5月', '6月'];
+                        const counts = months.map((month, index) => monthCounts[index + 1] || 0);
+                        
+                        const chartDom = document.getElementById('appointmentChart');
+                        const myChart = echarts.init(chartDom);
+                        const option = {
+                            title: {
+                                text: '预约人数趋势'
+                            },
+                            tooltip: {
+                                trigger: 'axis'
+                            },
+                            xAxis: {
+                                type: 'category',
+                                data: months
+                            },
+                            yAxis: {
+                                type: 'value',
+                                minInterval: 1
+                            },
+                            series: [{
+                                data: counts,
+                                type: 'line',
+                                smooth: true,
+                                lineStyle: {
+                                    width: 3
+                                },
+                                itemStyle: {
+                                    color: '#4a90e2'
+                                }
+                            }]
+                        };
+                        myChart.setOption(option);
+                    }
+                })
+                .catch(function(error) {
+                    console.error('加载预约数据失败:', error);
+                });
+        }
+
+        // 加载科室预约人数柱状图
+        function loadDepartmentAppointments() {
+            // 首先获取科室列表
+            axios.get('/medical/department/list')
+                .then(function(deptResponse) {
+                    if (deptResponse.data.code === 200) {
+                        const departments = deptResponse.data.data;
+                        const departmentMap = {};
+                        departments.forEach(dept => {
+                            departmentMap[dept.id] = dept.name;
+                        });
+                        
+                        // 获取所有医生数据，建立医生ID到科室ID的映射
+                        const doctorToDepartmentMap = {};
+                        axios.get('/medical/doctor/list')
+                            .then(function(doctorResponse) {
+                                if (doctorResponse.data.code === 200) {
+                                    const doctors = doctorResponse.data.data;
+                                    doctors.forEach(doctor => {
+                                        doctorToDepartmentMap[doctor.id] = doctor.departmentId;
+                                    });
+                                    
+                                    // 获取所有预约数据
+                                    axios.get('/medical/appointment/list')
+                                        .then(function(appointmentResponse) {
+                                            if (appointmentResponse.data.code === 200) {
+                                                const appointments = appointmentResponse.data.data;
+                                                // 统计各科室的预约人数
+                                                const departmentCounts = {};
+                                                departments.forEach(dept => {
+                                                    departmentCounts[dept.id] = 0;
+                                                });
+                                                
+                                                appointments.forEach(appointment => {
+                                                    if (appointment.doctorId) {
+                                                        const departmentId = doctorToDepartmentMap[appointment.doctorId];
+                                                        if (departmentId) {
+                                                            departmentCounts[departmentId] = (departmentCounts[departmentId] || 0) + 1;
+                                                        }
+                                                    }
+                                                });
+                                                
+                                                // 准备图表数据
+                                                const departmentNames = departments.map(dept => dept.name);
+                                                const appointmentCounts = departments.map(dept => departmentCounts[dept.id] || 0);
+                                                
+                                                // 创建柱状图
+                                                const chartDom = document.getElementById('departmentChart');
+                                                const myChart = echarts.init(chartDom);
+                                                const option = {
+                                                    title: {
+                                                        text: '各科室预约人数'
+                                                    },
+                                                    tooltip: {
+                                                        trigger: 'axis',
+                                                        axisPointer: {
+                                                            type: 'shadow'
+                                                        }
+                                                    },
+                                                    xAxis: {
+                                                        type: 'category',
+                                                        data: departmentNames,
+                                                        axisLabel: {
+                                                            rotate: 45
+                                                        }
+                                                    },
+                                                    yAxis: {
+                                                        type: 'value',
+                                                        minInterval: 1
+                                                    },
+                                                    series: [{
+                                                        name: '预约人数',
+                                                        type: 'bar',
+                                                        data: appointmentCounts,
+                                                        itemStyle: {
+                                                            color: '#50c878'
+                                                        },
+                                                        barWidth: '60%'
+                                                    }]
+                                                };
+                                                myChart.setOption(option);
+                                            }
+                                        })
+                                        .catch(function(error) {
+                                            console.error('加载预约数据失败:', error);
+                                        });
+                                }
+                            })
+                            .catch(function(error) {
+                                console.error('加载医生数据失败:', error);
+                            });
+                    }
+                })
+                .catch(function(error) {
+                    console.error('加载科室列表失败:', error);
+                });
+        }
+
+        // 显示添加科室表单
+        function showAddDepartmentForm() {
+            // 显示添加科室模态框
+            document.getElementById('addDepartmentModal').style.display = 'block';
+        }
+
+        // 关闭添加科室模态框
+        function closeAddDepartmentModal() {
+            document.getElementById('addDepartmentModal').style.display = 'none';
+        }
+
+        // 提交添加科室表单
+        function submitAddDepartmentForm() {
+            const form = document.getElementById('addDepartmentForm');
+            const department = {
+                name: form.name.value,
+                description: form.description.value
+            };
+
+            axios.post('/medical/department/add', department)
+                .then(function(response) {
+                    if (response.data.code === 200) {
+                        alert('添加成功');
+                        document.getElementById('addDepartmentModal').style.display = 'none';
+                        loadDepartments(); // 重新加载科室列表
+                        form.reset();
+                    } else {
+                        alert('添加失败: ' + response.data.message);
+                    }
+                })
+                .catch(function(error) {
+                    console.error('添加科室失败:', error);
+                    alert('添加失败，请检查网络连接');
+                });
+        }
+
+        // 编辑科室
+        function editDepartment(id) {
+            // 获取科室信息
+            axios.get(`/medical/department/${id}`)
+                .then(function(response) {
+                    if (response.data.code === 200) {
+                        const department = response.data.data;
+                        document.getElementById('editDepartmentId').value = department.id;
+                        document.getElementById('editDepartmentName').value = department.name;
+                        document.getElementById('editDepartmentDescription').value = department.description;
+                        document.getElementById('editDepartmentModal').style.display = 'block';
+                    } else {
+                        alert('获取科室信息失败: ' + response.data.message);
+                    }
+                })
+                .catch(function(error) {
+                    console.error('获取科室信息失败:', error);
+                    alert('获取科室信息失败，请检查网络连接');
+                });
+        }
+
+        // 关闭编辑科室模态框
+        function closeEditDepartmentModal() {
+            document.getElementById('editDepartmentModal').style.display = 'none';
+        }
+
+        // 提交编辑科室表单
+        function submitEditDepartmentForm() {
+            const form = document.getElementById('editDepartmentForm');
+            const department = {
+                id: parseInt(form.id.value),
+                name: form.name.value,
+                description: form.description.value
+            };
+
+            axios.put('/medical/department/update', department)
+                .then(function(response) {
+                    if (response.data.code === 200) {
+                        alert('更新成功');
+                        document.getElementById('editDepartmentModal').style.display = 'none';
+                        loadDepartments(); // 重新加载科室列表
+                    } else {
+                        alert('更新失败: ' + response.data.message);
+                    }
+                })
+                .catch(function(error) {
+                    console.error('更新科室失败:', error);
+                    alert('更新失败，请检查网络连接');
+                });
+        }
+
+        // 删除科室
+        function deleteDepartment(id) {
+            if (confirm('确定要删除这个科室吗？')) {
+                axios.delete(`/medical/department/delete/${id}`)
+                    .then(function(response) {
+                        if (response.data.code === 200) {
+                            alert('删除成功');
+                            loadDepartments(); // 重新加载科室列表
+                        } else {
+                            alert('删除失败: ' + response.data.message);
+                        }
+                    })
+                    .catch(function(error) {
+                        console.error('删除科室失败:', error);
+                        alert('删除失败，请检查网络连接');
+                    });
+            }
+        }
+
+        // 显示添加医生表单
+        function showAddDoctorForm() {
+            // 加载科室列表
+            loadDepartmentsForDoctorForm();
+            // 显示添加医生模态框
+            document.getElementById('addDoctorModal').style.display = 'block';
+        }
+
+        // 加载科室列表用于医生表单
+        function loadDepartmentsForDoctorForm() {
+            axios.get('/medical/department/list')
+                .then(function(response) {
+                    if (response.data.code === 200) {
+                        const departments = response.data.data;
+                        const select = document.getElementById('departmentId');
+                        select.innerHTML = '<option value="">请选择科室</option>';
+                        departments.forEach(function(dept) {
+                            const option = document.createElement('option');
+                            option.value = dept.id;
+                            option.textContent = dept.name;
+                            select.appendChild(option);
+                        });
+                    }
+                })
+                .catch(function(error) {
+                    console.error('加载科室列表失败:', error);
+                });
+        }
+
+        // 提交添加医生表单
+        function submitAddDoctorForm() {
+            const form = document.getElementById('addDoctorForm');
+            const doctor = {
+                name: form.name.value,
+                gender: form.gender.value,
+                age: parseInt(form.age.value),
+                title: form.title.value,
+                departmentId: parseInt(form.departmentId.value),
+                description: form.description.value
+            };
+
+            axios.post('/medical/doctor/add', doctor)
+                .then(function(response) {
+                    if (response.data.code === 200) {
+                        alert('添加成功');
+                        document.getElementById('addDoctorModal').style.display = 'none';
+                        loadDoctors(); // 重新加载医生列表
+                        form.reset();
+                    } else {
+                        alert('添加失败: ' + response.data.message);
+                    }
+                })
+                .catch(function(error) {
+                    console.error('添加医生失败:', error);
+                    alert('添加失败，请检查网络连接');
+                });
+        }
+
+        // 关闭添加医生模态框
+        function closeAddDoctorModal() {
+            document.getElementById('addDoctorModal').style.display = 'none';
+        }
+
+        // 加载管理员列表
+        function loadAdmins() {
+            const adminTableBody = document.getElementById('adminTableBody');
+            adminTableBody.innerHTML = '<tr><td colspan="4" class="text-center">加载中...</td></tr>';
+
+            axios.get('/medical/admin/list')
+                .then(function(response) {
+                    if (response.data.code === 200) {
+                        const admins = response.data.data;
+                        adminTableBody.innerHTML = '';
+                        admins.forEach(function(admin) {
+                            const row = document.createElement('tr');
+                            row.innerHTML = `
+                                <td>${admin.id}</td>
+                                <td>${admin.username}</td>
+                                <td>${admin.name}</td>
+                                <td>
+                                    <button class="btn btn-primary btn-sm" onclick="editAdmin(${admin.id})">编辑</button>
+                                    <button class="btn btn-danger btn-sm" onclick="deleteAdmin(${admin.id})">删除</button>
+                                </td>
+                            `;
+                            adminTableBody.appendChild(row);
+                        });
+                    } else {
+                        adminTableBody.innerHTML = '<tr><td colspan="4" class="text-center text-danger">加载失败</td></tr>';
+                    }
+                })
+                .catch(function(error) {
+                    console.error('加载管理员列表失败:', error);
+                    adminTableBody.innerHTML = '<tr><td colspan="4" class="text-center text-danger">加载失败</td></tr>';
+                });
+        }
+
+        // 显示添加管理员表单
+        function showAddAdminForm() {
+            document.getElementById('addAdminModal').style.display = 'block';
+        }
+
+        // 提交添加管理员表单
+        function submitAddAdminForm() {
+            const form = document.getElementById('addAdminForm');
+            const admin = {
+                username: form.username.value,
+                password: form.password.value,
+                name: form.name.value
+            };
+
+            axios.post('/medical/admin/add', admin)
+                .then(function(response) {
+                    if (response.data.code === 200) {
+                        alert('添加成功');
+                        document.getElementById('addAdminModal').style.display = 'none';
+                        loadAdmins(); // 重新加载管理员列表
+                        form.reset();
+                    } else {
+                        alert('添加失败: ' + response.data.message);
+                    }
+                })
+                .catch(function(error) {
+                    console.error('添加管理员失败:', error);
+                    alert('添加失败，请检查网络连接');
+                });
+        }
+
+        // 关闭添加管理员模态框
+        function closeAddAdminModal() {
+            document.getElementById('addAdminModal').style.display = 'none';
+        }
+
+        // 编辑管理员
+        function editAdmin(id) {
+            alert('编辑管理员功能开发中');
+        }
+
+        // 删除管理员
+        function deleteAdmin(id) {
+            if (confirm('确定要删除这个管理员吗？')) {
+                axios.delete(`/medical/admin/delete/${id}`)
+                    .then(function(response) {
+                        if (response.data.code === 200) {
+                            alert('删除成功');
+                            loadAdmins(); // 重新加载管理员列表
+                        } else {
+                            alert('删除失败: ' + response.data.message);
+                        }
+                    })
+                    .catch(function(error) {
+                        console.error('删除管理员失败:', error);
+                        alert('删除失败，请检查网络连接');
+                    });
+            }
+        };
+    </script>
+
+    <!-- 添加医生模态框 -->
+    <div id="addDoctorModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>添加医生</h3>
+                <button type="button" class="close" onclick="closeAddDoctorModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="addDoctorForm">
+                    <div class="form-group">
+                        <label for="name">姓名</label>
+                        <input type="text" id="name" name="name" class="form-control" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="gender">性别</label>
+                        <select id="gender" name="gender" class="form-control" required>
+                            <option value="男">男</option>
+                            <option value="女">女</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="age">年龄</label>
+                        <input type="number" id="age" name="age" class="form-control" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="title">职称</label>
+                        <input type="text" id="title" name="title" class="form-control" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="departmentId">科室</label>
+                        <select id="departmentId" name="departmentId" class="form-control" required>
+                            <option value="">请选择科室</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="description">简介</label>
+                        <textarea id="description" name="description" class="form-control" rows="3"></textarea>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" onclick="closeAddDoctorModal()">取消</button>
+                <button type="button" class="btn btn-primary" onclick="submitAddDoctorForm()">提交</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 添加科室模态框 -->
+    <div id="addDepartmentModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>添加科室</h3>
+                <button type="button" class="close" onclick="closeAddDepartmentModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="addDepartmentForm">
+                    <div class="form-group">
+                        <label for="departmentName">科室名称</label>
+                        <input type="text" id="departmentName" name="name" class="form-control" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="departmentDescription">描述</label>
+                        <textarea id="departmentDescription" name="description" class="form-control" rows="3" required></textarea>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" onclick="closeAddDepartmentModal()">取消</button>
+                <button type="button" class="btn btn-primary" onclick="submitAddDepartmentForm()">提交</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 编辑科室模态框 -->
+    <div id="editDepartmentModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>编辑科室</h3>
+                <button type="button" class="close" onclick="closeEditDepartmentModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="editDepartmentForm">
+                    <input type="hidden" id="editDepartmentId" name="id">
+                    <div class="form-group">
+                        <label for="editDepartmentName">科室名称</label>
+                        <input type="text" id="editDepartmentName" name="name" class="form-control" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="editDepartmentDescription">描述</label>
+                        <textarea id="editDepartmentDescription" name="description" class="form-control" rows="3" required></textarea>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" onclick="closeEditDepartmentModal()">取消</button>
+                <button type="button" class="btn btn-primary" onclick="submitEditDepartmentForm()">提交</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 添加管理员模态框 -->
+    <div id="addAdminModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>添加管理员</h3>
+                <button type="button" class="close" onclick="closeAddAdminModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="addAdminForm">
+                    <div class="form-group">
+                        <label for="username">用户名</label>
+                        <input type="text" id="username" name="username" class="form-control" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="password">密码</label>
+                        <input type="password" id="password" name="password" class="form-control" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="name">姓名</label>
+                        <input type="text" id="name" name="name" class="form-control" required>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" onclick="closeAddAdminModal()">取消</button>
+                <button type="button" class="btn btn-primary" onclick="submitAddAdminForm()">提交</button>
+            </div>
+        </div>
+    </div>
+
+</body>
+</html>

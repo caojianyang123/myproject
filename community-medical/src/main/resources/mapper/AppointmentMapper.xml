@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.medical.mapper.AppointmentMapper">
+
+    <resultMap id="BaseResultMap" type="com.medical.entity.Appointment">
+        <id column="id" property="id"/>
+        <result column="user_id" property="userId"/>
+        <result column="doctor_id" property="doctorId"/>
+        <result column="appointment_date" property="appointmentDate"/>
+        <result column="description" property="description"/>
+        <result column="status" property="status"/>
+        <result column="create_time" property="createTime"/>
+    </resultMap>
+
+    <select id="selectByUserId" resultMap="BaseResultMap">
+        SELECT * FROM appointment WHERE user_id = #{userId} ORDER BY create_time DESC
+    </select>
+
+    <select id="selectByDoctorId" resultMap="BaseResultMap">
+        SELECT * FROM appointment WHERE doctor_id = #{doctorId} ORDER BY create_time DESC
+    </select>
+
+    <select id="checkConflict" resultMap="BaseResultMap">
+        SELECT * FROM appointment 
+        WHERE user_id = #{userId} 
+        AND doctor_id = #{doctorId} 
+        AND appointment_date = #{appointmentDate}
+        AND status IN (0, 1)
+    </select>
+
+    <insert id="insert" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO appointment (user_id, doctor_id, appointment_date, description, status, create_time)
+        VALUES (#{userId}, #{doctorId}, #{appointmentDate}, #{description}, #{status}, NOW())
+    </insert>
+
+    <update id="update">
+        UPDATE appointment
+        SET user_id = #{userId},
+            doctor_id = #{doctorId},
+            appointment_date = #{appointmentDate},
+            description = #{description},
+            status = #{status}
+        WHERE id = #{id}
+    </update>
+
+    <delete id="deleteById">
+        DELETE FROM appointment WHERE id = #{id}
+    </delete>
+
+    <select id="selectById" resultMap="BaseResultMap">
+        SELECT * FROM appointment WHERE id = #{id}
+    </select>
+
+    <select id="selectAll" resultMap="BaseResultMap">
+        SELECT * FROM appointment ORDER BY create_time DESC
+    </select>
+
+</mapper>

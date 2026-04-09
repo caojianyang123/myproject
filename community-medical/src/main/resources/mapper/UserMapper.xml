@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.medical.mapper.UserMapper">
+
+    <resultMap id="BaseResultMap" type="com.medical.entity.User">
+        <id column="id" property="id"/>
+        <result column="username" property="username"/>
+        <result column="password" property="password"/>
+        <result column="name" property="name"/>
+        <result column="phone" property="phone"/>
+        <result column="id_card" property="idCard"/>
+        <result column="status" property="status"/>
+        <result column="create_time" property="createTime"/>
+    </resultMap>
+
+    <select id="login" resultMap="BaseResultMap">
+        SELECT * FROM user 
+        WHERE username = #{username} AND password = #{password} AND status = 1
+    </select>
+
+    <insert id="insert" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO user (username, password, name, phone, id_card, status, create_time)
+        VALUES (#{username}, #{password}, #{name}, #{phone}, #{idCard}, #{status}, NOW())
+    </insert>
+
+    <update id="update">
+        UPDATE user
+        SET username = #{username},
+            password = #{password},
+            name = #{name},
+            phone = #{phone},
+            id_card = #{idCard},
+            status = #{status}
+        WHERE id = #{id}
+    </update>
+
+    <delete id="deleteById">
+        DELETE FROM user WHERE id = #{id}
+    </delete>
+
+    <select id="selectById" resultMap="BaseResultMap">
+        SELECT * FROM user WHERE id = #{id}
+    </select>
+
+    <select id="selectAll" resultMap="BaseResultMap">
+        SELECT * FROM user ORDER BY id
+    </select>
+
+</mapper>
